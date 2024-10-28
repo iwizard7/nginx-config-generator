@@ -31,7 +31,7 @@ jobs:
           python generate_nginx_config.py "$input_file" "$output_file"
 
       - name: Загрузка сгенерированного файла
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: nginx-config
           path: nginx_config_*.conf
