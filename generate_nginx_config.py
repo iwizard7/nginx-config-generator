@@ -109,19 +109,21 @@ def generate_nginx_config(server_name, vars_dict, endpoints):
 def main():
     # Настройка парсера аргументов командной строки
     parser = argparse.ArgumentParser(description='Генерация конфигурации NGINX из файла.')
-    parser.add_argument('input_file', type=str, help='Путь к входному файлу с локейшенами.')
-    parser.add_argument('output_file', type=str, help='Путь для сохранения конфигурации NGINX.')
+    parser.add_argument('input_file', nargs='?', type=str, help='Путь к входному файлу с локейшенами.')
+    parser.add_argument('output_file', nargs='?', type=str, help='Путь для сохранения конфигурации NGINX.')
 
     args = parser.parse_args()
 
-    # Получаем значения из аргументов
-    input_file = args.input_file
-    output_file = args.output_file
+    # Если аргументы не переданы, запрашиваем у пользователя
+    if not args.input_file:
+        args.input_file = input("Введите путь к входному файлу: ")
+    if not args.output_file:
+        args.output_file = input("Введите путь для сохранения конфигурации NGINX: ")
 
-    server_name, vars_dict, endpoints = parse_input_file(input_file)
+    server_name, vars_dict, endpoints = parse_input_file(args.input_file)
     nginx_config, location_count, method_count = generate_nginx_config(server_name, vars_dict, endpoints)
 
-    with open(output_file, 'w') as file:
+    with open(args.output_file, 'w') as file:
         file.write(nginx_config)
 
     # Выводим информацию о созданных блоках
