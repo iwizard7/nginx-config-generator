@@ -1,0 +1,11 @@
+server_name:testtest.com
+---
+proxy_pass:http://k8s-ingress
+---
+vars:
+{period}=1m
+{date}=2019-05-12
+{yesno}=yes
+---
+POST api/account/signinstage
+POST api/account/signin
