@@ -1,4 +1,4 @@
-server_name:testtest.com
+server_name:testtest3.com
 ---
 proxy_pass:http://k8s-ingress
 ---
