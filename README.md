@@ -14,6 +14,8 @@
 ```
 server_name: test-server.com
 ---
+proxy_pass:http://k8s-ingress
+---
 vars: 
 {envname1}=419863-049523 
 {envname2}=5944223432 

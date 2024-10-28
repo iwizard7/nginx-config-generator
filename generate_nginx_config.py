@@ -8,9 +8,10 @@ def parse_input_file(input_file):
 
     # Разделяем секции
     sections = data.split('---')
-    server_name = sections[0].strip()
-    vars_section = sections[1].strip()
-    endpoints_section = sections[2].strip()
+    server_name = sections[0].strip().split(':')[1].strip()  # Извлекаем имя сервера
+    proxy_pass = sections[1].strip().split(':', 1)[1].strip()  # Извлекаем значение proxy_pass
+    vars_section = sections[2].strip()
+    endpoints_section = sections[3].strip()
 
     # Парсим переменные
     vars_dict = parse_vars(vars_section)
@@ -18,7 +19,7 @@ def parse_input_file(input_file):
     # Парсим конечные точки
     endpoints = parse_endpoints(endpoints_section)
 
-    return server_name, vars_dict, endpoints
+    return server_name, proxy_pass, vars_dict, endpoints
 
 
 def parse_vars(vars_section):
@@ -80,7 +81,7 @@ def replace_vars_with_regex(path, vars_dict):
     return re.sub(pattern, replacer, path)
 
 
-def generate_nginx_config(server_name, vars_dict, endpoints):
+def generate_nginx_config(server_name, proxy_pass, vars_dict, endpoints):
     config_lines = [f"server {{\n    server_name {server_name};\n"]
     location_count = 0
     method_count = {method: 0 for method in endpoints.keys()}
@@ -93,7 +94,7 @@ def generate_nginx_config(server_name, vars_dict, endpoints):
             # Генерация блока location с директивой limit_except
             location_block = f"    location ~ ^/{regex_path} {{\n"
             location_block += f"        limit_except {method} {{ deny all; }}\n"
-            location_block += "        proxy_pass http://backend;\n"
+            location_block += f"        proxy_pass {proxy_pass};\n"  # Исправлено
             location_block += "    }\n"
             config_lines.append(location_block)
 
@@ -120,8 +121,8 @@ def main():
     if not args.output_file:
         args.output_file = input("Введите путь для сохранения конфигурации NGINX: ")
 
-    server_name, vars_dict, endpoints = parse_input_file(args.input_file)
-    nginx_config, location_count, method_count = generate_nginx_config(server_name, vars_dict, endpoints)
+    server_name, proxy_pass, vars_dict, endpoints = parse_input_file(args.input_file)
+    nginx_config, location_count, method_count = generate_nginx_config(server_name, proxy_pass, vars_dict, endpoints)
 
     with open(args.output_file, 'w') as file:
         file.write(nginx_config)
