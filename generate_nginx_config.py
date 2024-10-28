@@ -81,6 +81,8 @@ def replace_vars_with_regex(path, vars_dict):
 
 def generate_nginx_config(server_name, vars_dict, endpoints):
     config_lines = [f"server {{\n    server_name {server_name};\n"]
+    location_count = 0
+    method_count = {method: 0 for method in endpoints.keys()}
 
     # Добавляем блоки location для каждого метода и пути
     for method, paths in endpoints.items():
@@ -94,8 +96,13 @@ def generate_nginx_config(server_name, vars_dict, endpoints):
             location_block += "    }\n"
             config_lines.append(location_block)
 
+            # Увеличиваем счётчик местоположений и методов
+            location_count += 1
+            method_count[method] += 1
+
     config_lines.append("}\n")
-    return ''.join(config_lines)
+
+    return ''.join(config_lines), location_count, method_count
 
 
 def main():
@@ -103,10 +110,15 @@ def main():
     output_file = input("Введите путь для сохранения конфигурации NGINX: ")
 
     server_name, vars_dict, endpoints = parse_input_file(input_file)
-    nginx_config = generate_nginx_config(server_name, vars_dict, endpoints)
+    nginx_config, location_count, method_count = generate_nginx_config(server_name, vars_dict, endpoints)
 
     with open(output_file, 'w') as file:
         file.write(nginx_config)
+
+    # Выводим информацию о созданных блоках
+    print(f"Создано {location_count} блоков location.")
+    for method, count in method_count.items():
+        print(f"Метод {method}: {count} блок(ов).")
 
 
 if __name__ == "__main__":
