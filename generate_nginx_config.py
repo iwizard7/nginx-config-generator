@@ -87,7 +87,10 @@ def generate_nginx_config(server_name, vars_dict, endpoints):
         for path in paths:
             # Заменяем переменные на соответствующие регулярные выражения
             regex_path = replace_vars_with_regex(path, vars_dict)
-            location_block = f"    location ~ ^/{regex_path} {{\n        proxy_pass http://backend;\n"
+            # Генерация блока location с директивой limit_except
+            location_block = f"    location ~ ^/{regex_path} {{\n"
+            location_block += f"        limit_except {method} {{ deny all; }}\n"
+            location_block += "        proxy_pass http://backend;\n"
             location_block += "    }\n"
             config_lines.append(location_block)
 
